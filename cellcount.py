@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import math
 import os
+import tqdm
 
 
 matplotlib.rcParams["figure.figsize"] = (5.0, 5.0)
@@ -37,7 +38,7 @@ def image_configure(args_dir: str) -> dict:
     # Configure variables
     holding_dict = dict()
     # Loop through all of the photos within supplied directory
-    for file in os.listdir(args_dir):
+    for file in tqdm.tqdm(os.listdir(args_dir)):
 
         # Load in the data
         img = cv2.imread(args_dir + "/" + file)
@@ -45,12 +46,13 @@ def image_configure(args_dir: str) -> dict:
         # Conver the image to grayscale
         hsv = cv2.cvtColor(original, cv2.COLOR_BGR2HSV)
         # Set the upper and lower limits of the colors that we are looking for in the image
+
         hsv_lower = np.array([35, 20, 20])
         hsv_upper = np.array([85, 225, 255])
         # Set the range and the kernel size of the cells
 
         mask = cv2.inRange(hsv, hsv_lower, hsv_upper)
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
         # Dilate the found images so that they are larger
         dilate = cv2.dilate(mask, kernel, iterations=1)
 
@@ -61,9 +63,9 @@ def image_configure(args_dir: str) -> dict:
         cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
 
-        minimum_area = 200
-        average_cell_area = 500
-        connected_cell_area = 1000
+        minimum_area = 20
+        average_cell_area = 30
+        connected_cell_area = 60
         cells = 0
         for c in cnts:
             area = cv2.contourArea(c)
@@ -94,4 +96,11 @@ total = 0
 for i in counts.values():
     total += i
 
-print(f"There are a total of {total} cells alive in the photos")
+###### write to csv
+
+with open("counts.csv", "w") as output:
+    print("File", "Count", sep=",", file=output)
+    for k, v in counts.items():
+        print(k, v, sep=",", file=output)
+    print("Total", total, sep=",", file=output)
+
