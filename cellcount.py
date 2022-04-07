@@ -8,7 +8,7 @@ import math
 import os
 import tqdm
 
-
+# Set figure params
 matplotlib.rcParams["figure.figsize"] = (5.0, 5.0)
 
 
@@ -21,6 +21,26 @@ def args():
         "-f",
         help="This is the directory that holds all of the photos. All of the photos \
     should be included in this folder. This means there should be no subdirectories.",
+    )
+    parser.add_argument(
+        "--min_cell_area",
+        help="Set the minimum cell area of your cells. This is the cutoff to coundt a \
+            something as a cell. It has to be this large. Default is 20. Check data to see what \
+            the model is based off of.",
+        default=20,
+        type=int
+    )
+    parser.add_argument(
+        "--avg_cell_area",
+        help="Set what the average cell size is for each cell in the image. Default is 30.",
+        default=30,
+        type=int
+    )
+    parser.add_argument(
+        "--connected_cell_area",
+        help="Set the average area of two connected cells. Default is 60.",
+        default=60,
+        type=int
     )
     return parser.parse_args()
 
@@ -56,16 +76,13 @@ def image_configure(args_dir: str) -> dict:
         # Dilate the found images so that they are larger
         dilate = cv2.dilate(mask, kernel, iterations=1)
 
-        # sta = np.hstack((mask, dilate))
-        # plt.imshow(sta)
-        # plt.show()
-
         cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
 
-        minimum_area = 20
-        average_cell_area = 30
-        connected_cell_area = 60
+        minimum_area = args.min_cell_area
+        average_cell_area = args.avg_cell_area 
+        connected_cell_area = args.connected_cell_area
+
         cells = 0
         for c in cnts:
             area = cv2.contourArea(c)
@@ -76,10 +93,6 @@ def image_configure(args_dir: str) -> dict:
                 else:
                     cells += 1
 
-        # stack = np.hstack((img, original))
-        # plt.imshow(stack)
-        # plt.title(f'Alive Cells {cells}')
-        # plt.show()
 
         # split the string and add the name and cell count to this dictionary
         split_string = file.split("/")[-1]
