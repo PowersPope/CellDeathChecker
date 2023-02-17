@@ -24,7 +24,7 @@ def args():
     )
     parser.add_argument(
         "--min_cell_area",
-        help="Set the minimum cell area of your cells. This is the cutoff to coundt a \
+        help="Set the minimum cell area of your cells. This is the cutoff to count \
             something as a cell. It has to be this large. Default is 20. Check data to see what \
             the model is based off of.",
         default=20,
@@ -52,7 +52,7 @@ def image_configure(args_dir: str) -> dict:
 
     """
     When supplied a directory from argparse, we take that directory and then apply OpenCV
-    transformations, HSV, and dilation to count the amount of cells that are present with the data.
+    transformations, HSV, and dilation to count the amount of cells that are present within the data.
     """
 
     # Configure variables
